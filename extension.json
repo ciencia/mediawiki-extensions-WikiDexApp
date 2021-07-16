@@ -5,14 +5,9 @@
 		"Jesús Martínez (Ciencia Al Poder)"
 	],
 	"url": "https://github.com/ciencia/mediawiki-extensions-WikiDexApp",
-	"descriptionmsg": "wikidexapp-desc",
+	"description": "Modificaciones para optimizar el uso de la App para Android.",
 	"license-name": "MIT",
 	"type": "api",
-	"MessagesDirs": {
-		"WikiDexApp": [
-			"i18n"
-		]
-	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\WikiDexApp\\": "includes/"
 	},
