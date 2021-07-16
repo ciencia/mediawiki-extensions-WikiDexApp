@@ -27,36 +27,28 @@ class ApiCacheConfigurator {
 		if ( $this->mModule == null ) {
 			return;
 		}
-		header( 'X-ACD: 1' );
 		$apiMain = $this->mModule->getMain();
 		$request = $apiMain->getRequest();
 		# FauxRequest siempre retorna error al llamar a getRequestURL()
 		if ( is_a( $request, 'FauxRequest' ) ) {
-			header( 'X-ACD: 2' );
 			return;
 		}
 		if ( $request->getMethod() != 'GET' && $request->getMethod() != 'HEAD' ) {
-			header( 'X-ACD: 3' );
 			return;
 		}
 		if ( $this->isHelpModule() ) {
-			header( 'X-ACD: 4' );
 			$this->setHelpCache();
 			return;
 		}
 		if ( $this->isOpenSearchModule() ) {
-			header( 'X-ACD: 5' );
 			$this->setOpeSearchCache();
 			return;
 		}
 		$cacheURL = '';
 		$action = $request->getVal( 'action' );
-		header( 'X-ACD: 8' );
 		if ( $action == 'parse' ) {
-			header( 'X-ACD: 6' );
 			$this->setParseActionCache( $request );
 		} else if ( $action = 'query' ) {
-			header( 'X-ACD: 7' );
 			$this->setQueryActionCache( $request );
 		}
 	}
@@ -99,8 +91,6 @@ class ApiCacheConfigurator {
 			// full URL
 			$url = preg_replace( '!^[^:]+://[^/]+/+!', '/', $url );
 		}
-		header( sprintf( 'X-Compare1: %s', $url ) );
-		header( sprintf( 'X-Compare2: %s', $request->getRequestURL() ) );
 		return $url == $request->getRequestURL();
 	}
 
@@ -165,26 +155,18 @@ class ApiCacheConfigurator {
 			return;
 		}
 		$cacheURL = UrlMapper::getAppPageUrl1( $title );
-		header( 'X-ACD-Action: 3' );
 		if ( $this->isSameRequestUrl( $request, $cacheURL ) ) {
-			header( 'X-ACD-Action: 4' );
 			$apiMain = $this->mModule->getMain();
 			$result = $apiMain->getResult();
 			if ( is_a( $result, 'ApiResult' ) ) {
-				header( 'X-ACD-Action: 5' );
 				$transforms = [ 'Strip' => 'all' ]; // Strip all metadata
 				$redirects = $result->getResultData( [ 'parse', 'redirects' ], $transforms );
 				if ( !empty( $redirects ) ) {
-					header( 'X-ACD-Action: 6' );
-					header( sprintf( 'X-Result: %s', preg_replace( '/\n/', '', print_r( $redirects, true ) ) ) );
 					// It resolved a redirect. We can't purge redirects
 					$this->setMicroCaching();
 				} else {
-					header( 'X-ACD-Action: 7' );
 					$this->setStandardCaching();
 				}
-			} else {
-				header( sprintf( 'X-Result: %s', preg_replace( '/\n/', '', get_class( $result ) ) ) );
 			}
 		}
 	}
