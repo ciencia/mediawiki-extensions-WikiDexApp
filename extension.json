@@ -1,0 +1,24 @@
+{
+	"name": "WikiDexApp",
+	"version": "1.0.0",
+	"author": [
+		"Jesús Martínez (Ciencia Al Poder)"
+	],
+	"url": "https://github.com/ciencia/mediawiki-extensions-WikiDexApp",
+	"descriptionmsg": "wikidexapp-desc",
+	"license-name": "MIT",
+	"type": "api",
+	"MessagesDirs": {
+		"WikiDexApp": [
+			"i18n"
+		]
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikiDexApp\\": "includes/"
+	},
+	"Hooks": {
+		"TitleSquidURLs": "MediaWiki\\Extension\\WikiDexApp\\Hooks::onTitleSquidURLs",
+		"APIAfterExecute": "MediaWiki\\Extension\\WikiDexApp\\Hooks::onAPIAfterExecute"
+	},
+	"manifest_version": 2
+}
