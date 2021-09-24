@@ -6,7 +6,7 @@ use \Title;
 use \MediaWiki\MediaWikiServices;
 
 /**
- * Configures API response
+ * Configures API responses for modules used by the app to boost caching
  *
  * @license MIT
  */
@@ -23,7 +23,6 @@ class ApiCacheConfigurator {
 	}
 
 	public function setup() {
-		global $wgCdnMaxAge;
 		if ( $this->mModule == null ) {
 			return;
 		}
@@ -37,19 +36,20 @@ class ApiCacheConfigurator {
 			return;
 		}
 		if ( $this->isHelpModule() ) {
-			$this->setHelpCache();
+			$this->setLooseCaching();
 			return;
 		}
 		if ( $this->isOpenSearchModule() ) {
-			$this->setOpeSearchCache();
+			$this->setCaching( 10800 ); // 3 hours
 			return;
 		}
-		$cacheURL = '';
 		$action = $request->getVal( 'action' );
 		if ( $action == 'parse' ) {
 			$this->setParseActionCache( $request );
 		} else if ( $action = 'query' ) {
 			$this->setQueryActionCache( $request );
+		} else if ( $action = 'wikidexpage' ) {
+			$this->setWikiDexPageActionCache( $request );
 		}
 	}
 
@@ -61,26 +61,11 @@ class ApiCacheConfigurator {
 		return is_a( $this->mModule, 'ApiOpenSearch' );
 	}
 
-	private function setHelpCache() {
-		$apiMain = $this->mModule->getMain();
-		$apiMain->setCacheMode( 'public' );
-		$apiMain->setCacheControl( [
-			'public' => true,
-			'max-age' => 30,
-			's-maxage' => 3600
-		] );
-	}
-
-	private function setOpeSearchCache() {
-		$apiMain = $this->mModule->getMain();
-		$apiMain->setCacheMode( 'public' );
-		$apiMain->setCacheControl( [
-			'public' => true,
-			'max-age' => 30,
-			's-maxage' => 10800
-		] );
-	}
-
+	/**
+	 * Evaluates if a WebRequest is equivalent to an URL
+	 *
+	 * @param WebRequest $request
+	 */
 	private function isSameRequestUrl( $request, $url ) {
 		// getRequestURL always strips until host (and port)
 		// Adapt $url making it root-relative
@@ -92,6 +77,35 @@ class ApiCacheConfigurator {
 			$url = preg_replace( '!^[^:]+://[^/]+/+!', '/', $url );
 		}
 		return $url == $request->getRequestURL();
+	}
+
+	/**
+	 * @param WebRequest $request
+	 */
+	private function setParseActionCache( $request ) {
+		$page = $request->getVal( 'page' );
+		if ( ! $page ) {
+			return;
+		}
+		$title = Title::newFromText( $page );
+		if ( ! $title ) {
+			return;
+		}
+		$cacheURL = UrlMapper::getAppPageUrl1( $title );
+		if ( $this->isSameRequestUrl( $request, $cacheURL ) ) {
+			$apiMain = $this->mModule->getMain();
+			$result = $apiMain->getResult();
+			if ( is_a( $result, 'ApiResult' ) ) {
+				$transforms = [ 'Strip' => 'all' ]; // Strip all metadata
+				$redirects = $result->getResultData( [ 'parse', 'redirects' ], $transforms );
+				if ( !empty( $redirects ) ) {
+					// It resolved a redirect. We can't purge redirects
+					$this->setMicroCaching();
+				} else {
+					$this->setStandardCaching();
+				}
+			}
+		}
 	}
 
 	/**
@@ -145,35 +159,16 @@ class ApiCacheConfigurator {
 	/**
 	 * @param WebRequest $request
 	 */
-	private function setParseActionCache( $request ) {
-		$page = $request->getVal( 'page' );
-		if ( ! $page ) {
-			return;
-		}
-		$title = Title::newFromText( $page );
-		if ( ! $title ) {
-			return;
-		}
-		$cacheURL = UrlMapper::getAppPageUrl1( $title );
+	private function setWikiDexPageActionCache( $request ) {
+		$cacheURL = UrlMapper::getAppPageUrlWikiDexPage1();
 		if ( $this->isSameRequestUrl( $request, $cacheURL ) ) {
-			$apiMain = $this->mModule->getMain();
-			$result = $apiMain->getResult();
-			if ( is_a( $result, 'ApiResult' ) ) {
-				$transforms = [ 'Strip' => 'all' ]; // Strip all metadata
-				$redirects = $result->getResultData( [ 'parse', 'redirects' ], $transforms );
-				if ( !empty( $redirects ) ) {
-					// It resolved a redirect. We can't purge redirects
-					$this->setMicroCaching();
-				} else {
-					$this->setStandardCaching();
-				}
-			}
+			$this->setStandardCaching( 'anon-public-user-private' );
 		}
 	}
 
-	private function setStandardCaching() {
+	private function setStandardCaching( $cacheMode = 'public' ) {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
-		$this->setCaching( $config->get( 'CdnMaxAge' ) );
+		$this->setCaching( $config->get( 'CdnMaxAge' ), $cacheMode );
 	}
 
 	private function setLooseCaching() {
@@ -184,10 +179,9 @@ class ApiCacheConfigurator {
 		$this->setCaching( 3600 ); // 1 hour
 	}
 
-	private function setCaching( $sMaxAge ) {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
+	private function setCaching( $sMaxAge, $cacheMode = 'public' ) {
 		$apiMain = $this->mModule->getMain();
-		$apiMain->setCacheMode( 'public' );
+		$apiMain->setCacheMode( $cacheMode );
 		$apiMain->setCacheControl( [
 			'public' => true,
 			'must-revalidate' => true,

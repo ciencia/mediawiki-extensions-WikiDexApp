@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ciencia Al Poder"
+		]
+	},
+	"apihelp-wikidexpage-description": "Obtiene toda la imformación de una página para mostrarla en la app.",
+	"apihelp-wikidexpage-summary": "Obtiene toda la imformación de una página para mostrarla en la app.",
+	"apihelp-wikidexpage-param-title": "Título de la página a mostrar.",
+	"apihelp-wikidexpage-example-page": "Obtiene la información de la página 'Guía de Detective Pikachu/Página 1'.",
+	"apihelp-wikidexappassetbundle-description": "Obtiene archivos CSS y JS necesarios para la app.",
+	"apihelp-wikidexappassetbundle-summary": "Obtiene archivos CSS y JS necesarios para la app.",
+	"apihelp-wikidexappassetbundle-example-simple": "Obtiene los archivos para la app."
+}

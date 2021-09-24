@@ -8,8 +8,18 @@
 	"description": "Modificaciones para optimizar el uso de la App para Android.",
 	"license-name": "MIT",
 	"type": "api",
+	"MessagesDirs": {
+		"WikiDexApp": [
+			"i18n"
+		]
+	},
+	"APIModules": {
+		"wikidexpage": "MediaWiki\\Extension\\WikiDexApp\\Api\\ApiWikiDexPage",
+		"wikidexappassetbundle": "MediaWiki\\Extension\\WikiDexApp\\Api\\ApiWikiDexAppAssetBundle"
+	},
 	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\WikiDexApp\\": "includes/"
+		"MediaWiki\\Extension\\WikiDexApp\\": "includes/",
+		"MediaWiki\\Extension\\WikiDexApp\\Api\\": "includes/api"
 	},
 	"Hooks": {
 		"TitleSquidURLs": "MediaWiki\\Extension\\WikiDexApp\\Hooks::onTitleSquidURLs",

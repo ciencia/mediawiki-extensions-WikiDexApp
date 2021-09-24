@@ -21,8 +21,11 @@ class Hooks {
 		if ( ! $title ) {
 			return true;
 		}
+		$urls[] = wfExpandUrl( UrlMapper::getAppPageUrlWikiDexPage1( $title ), PROTO_INTERNAL );
+		// old
 		$urls[] = wfExpandUrl( UrlMapper::getAppPageUrl1( $title ), PROTO_INTERNAL );
 		if ( strpos( $title->getPrefixedText(), 'MediaWiki:App/' ) === 0 ) {
+			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle2(), PROTO_INTERNAL );
 			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle1(), PROTO_INTERNAL );
 			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrl1( $title ), PROTO_INTERNAL );
 		}
