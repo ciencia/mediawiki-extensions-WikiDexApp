@@ -10,6 +10,7 @@ use \PoolCounterWorkViaCallback;
 use \MediaWiki\MediaWikiServices;
 use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
+use \MediaWiki\Revision\SlotRecord;
 use \ParserOptions;
 use \Status;
 use \Title;
@@ -47,21 +48,19 @@ class ApiWikiDexPage extends ApiBase {
 		}
 
 		$pageObj = WikiPage::factory( $titleObj );
-		$pageObj->loadPageData();
 		$apiResult = $this->getResult();
 		$result_array = [];
 
 		if ( $titleObj->isRedirect() ) {
 			$revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
-			$titles = $revisionLookup
-				->getRevisionByTitle( $oldTitle, 0, IDBAccessObject::READ_LATEST )
-				->getContent( SlotRecord::MAIN, RevisionRecord::FOR_THIS_USER, $user )
+			$titles = $revisionLookup->getRevisionByTitle( $titleObj )
+				->getContent( SlotRecord::MAIN )
 				->getRedirectChain();
 			$redirValues = [];
 
 			/** @var Title $newTitle */
 			foreach ( $titles as $id => $newTitle ) {
-				$titles[$id - 1] = $titles[$id - 1] ?? $oldTitle;
+				$titles[$id - 1] = $titles[$id - 1] ?? $titleObj;
 
 				$redirValues[] = [
 					'from' => $titles[$id - 1]->getPrefixedText(),
@@ -76,8 +75,10 @@ class ApiWikiDexPage extends ApiBase {
 
 			// Since the page changed, update $pageObj
 			$pageObj = WikiPage::factory( $titleObj );
-
 		}
+		$result_array['title'] = $titleObj->getPrefixedText();
+
+		$pageObj->loadPageData();
 
 		if ( !$titleObj->exists() ) {
 			$this->dieWithError( 'apierror-missingtitle' );

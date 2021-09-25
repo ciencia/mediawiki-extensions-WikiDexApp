@@ -29,6 +29,9 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 			[ 'MediaWiki:App/estilos.css', 'MediaWiki:App/estilosdiurnos.css', 'MediaWiki:App/estilosnocturnos.css', 'MediaWiki:App/scripts.js' ]
 		);
 
+		// Set the cache mode
+		$this->getMain()->setCacheMode( 'public' );
+
 		$apiResult = $this->getResult();
 		$apiResult->addValue( null, $this->getModuleName(), $result_array );
 	}
@@ -50,7 +53,7 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 		$mainPage = Title::newMainPage();
 		$result_array['mainpage'] = $mainPage->getPrefixedText();
 		$result_array['base'] = wfExpandUrl( $mainPage->getFullURL(), PROTO_CURRENT );
-		$result_array['generator'] = 'MediaWiki ' . MW_VERSION;
+		$result_array['mediawikiversion'] = MW_VERSION;
 	}
 
 	private function getPagesContent( &$result_array, $titles ) {

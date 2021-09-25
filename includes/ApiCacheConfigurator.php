@@ -46,10 +46,12 @@ class ApiCacheConfigurator {
 		$action = $request->getVal( 'action' );
 		if ( $action == 'parse' ) {
 			$this->setParseActionCache( $request );
-		} else if ( $action = 'query' ) {
+		} else if ( $action == 'query' ) {
 			$this->setQueryActionCache( $request );
-		} else if ( $action = 'wikidexpage' ) {
+		} else if ( $action == 'wikidexpage' ) {
 			$this->setWikiDexPageActionCache( $request );
+		} else if ( $action == 'wikidexappassetbundle' ) {
+			$this->setWikiDexAppAssetBundleActionCache( $request );
 		}
 	}
 
@@ -84,11 +86,11 @@ class ApiCacheConfigurator {
 	 */
 	private function setParseActionCache( $request ) {
 		$page = $request->getVal( 'page' );
-		if ( ! $page ) {
+		if ( !$page ) {
 			return;
 		}
 		$title = Title::newFromText( $page );
-		if ( ! $title ) {
+		if ( !$title ) {
 			return;
 		}
 		$cacheURL = UrlMapper::getAppPageUrl1( $title );
@@ -120,7 +122,7 @@ class ApiCacheConfigurator {
 			return;
 		}
 		$page = $request->getVal( 'titles' );
-		if ( ! $page ) {
+		if ( !$page ) {
 			return;
 		}
 		// Multiple titles
@@ -141,7 +143,7 @@ class ApiCacheConfigurator {
 			return;
 		}
 		$title = Title::newFromText( $page );
-		if ( ! $title ) {
+		if ( !$title ) {
 			return;
 		}
 		$cacheURL = UrlMapper::getProtectionUrl1( $title );
@@ -160,9 +162,27 @@ class ApiCacheConfigurator {
 	 * @param WebRequest $request
 	 */
 	private function setWikiDexPageActionCache( $request ) {
-		$cacheURL = UrlMapper::getAppPageUrlWikiDexPage1();
+		$page = $request->getVal( 'title' );
+		if ( !$page ) {
+			return;
+		}
+		$title = Title::newFromText( $page );
+		if ( !$title ) {
+			return;
+		}
+		$cacheURL = UrlMapper::getAppPageUrlWikiDexPage1( $title );
 		if ( $this->isSameRequestUrl( $request, $cacheURL ) ) {
 			$this->setStandardCaching( 'anon-public-user-private' );
+		}
+	}
+
+	/**
+	 * @param WebRequest $request
+	 */
+	private function setWikiDexAppAssetBundleActionCache( $request ) {
+		$cacheURL = UrlMapper::getAppStylesUrlBundle2();
+		if ( $this->isSameRequestUrl( $request, $cacheURL ) ) {
+			$this->setStandardCaching();
 		}
 	}
 
