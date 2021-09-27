@@ -139,7 +139,7 @@ class ApiWikiDexPage extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.wikidex.net/wiki/Ayuda:API:wikidexpage';
+		return 'https://github.com/ciencia/mediawiki-extensions-WikiDexApp/wiki/ApiWikiDexPage';
 	}
 
 	private function getPoolKey(): string {

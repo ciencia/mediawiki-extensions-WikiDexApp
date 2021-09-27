@@ -44,7 +44,7 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.wikidex.net/wiki/Ayuda:API:wikidexappassetbundle';
+		return 'https://github.com/ciencia/mediawiki-extensions-WikiDexApp/wiki/ApiWikiDexAppAssetBundle';
 	}
 
 	private function getSiteInfo( &$result_array ) {
@@ -66,7 +66,7 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 				$pagesContent[] = $this->getContentPage( $titleObj );
 			}
 		}
-		$result_array['pages'] = $pagesContent;
+		$result_array['resources'] = $pagesContent;
 	}
 
 	private function getContentPage( $title ) {

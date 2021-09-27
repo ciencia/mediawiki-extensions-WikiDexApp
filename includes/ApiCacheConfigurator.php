@@ -172,7 +172,18 @@ class ApiCacheConfigurator {
 		}
 		$cacheURL = UrlMapper::getAppPageUrlWikiDexPage1( $title );
 		if ( $this->isSameRequestUrl( $request, $cacheURL ) ) {
-			$this->setStandardCaching( 'anon-public-user-private' );
+			$apiMain = $this->mModule->getMain();
+			$result = $apiMain->getResult();
+			if ( is_a( $result, 'ApiResult' ) ) {
+				$transforms = [ 'Strip' => 'all' ]; // Strip all metadata
+				$redirects = $result->getResultData( [ 'wikidexpage', 'redirects' ], $transforms );
+				if ( !empty( $redirects ) ) {
+					// It resolved a redirect. We can't purge redirects
+					$this->setMicroCaching( 'anon-public-user-private' );
+				} else {
+					$this->setStandardCaching( 'anon-public-user-private' );
+				}
+			}
 		}
 	}
 
@@ -195,8 +206,8 @@ class ApiCacheConfigurator {
 		$this->setCaching( 86400 ); // 1 day
 	}
 
-	private function setMicroCaching() {
-		$this->setCaching( 3600 ); // 1 hour
+	private function setMicroCaching( $cacheMode = 'public' ) {
+		$this->setCaching( 3600, $cacheMode ); // 1 hour
 	}
 
 	private function setCaching( $sMaxAge, $cacheMode = 'public' ) {
