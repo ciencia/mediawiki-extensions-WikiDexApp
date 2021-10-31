@@ -5,12 +5,16 @@ namespace MediaWiki\Extension\WikiDexApp\Api;
 use \ApiBase;
 use \ApiMessage;
 use \ApiResult;
+use \ContentHandler;
+use \Content;
 use \IDBAccessObject;
+use \Linker;
 use \PoolCounterWorkViaCallback;
 use \MediaWiki\MediaWikiServices;
 use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
 use \MediaWiki\Revision\SlotRecord;
+use \MWContentSerializationException;
 use \ParserOptions;
 use \ParserOutput;
 use \Status;
@@ -18,19 +22,22 @@ use \Title;
 use \WikiPage;
 
 /**
- * A module that retrieves all the information of a page to be displayed
- * on the app.
+ * Displays an edit preview from the App to render how the page will look
+ * from the app.
  *
  * @ingroup API
  * @ingroup Extensions
  */
-class ApiWikiDexPage extends ApiBase {
+class ApiWikiDexEditPreview extends ApiBase {
 	use ApiWikiDexResourceLoaderTrait;
 
 	public function execute() {
+		global $wgEnableParserLimitReporting;
+
 		$params = $this->extractRequestParams();
 
 		$this->requireAtLeastOneParameter( $params, 'title' );
+		$this->requireAtLeastOneParameter( $params, 'text' );
 
 		$titleObj = Title::newFromText( $params['title'] );
 		if ( !$titleObj || $titleObj->isExternal() ) {
@@ -52,45 +59,36 @@ class ApiWikiDexPage extends ApiBase {
 		$pageObj = WikiPage::factory( $titleObj );
 		$apiResult = $this->getResult();
 		$result_array = [];
-
-		if ( $titleObj->isRedirect() ) {
-			$revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
-			$titles = $revisionLookup->getRevisionByTitle( $titleObj )
-				->getContent( SlotRecord::MAIN )
-				->getRedirectChain();
-			$redirValues = [];
-
-			/** @var Title $newTitle */
-			foreach ( $titles as $id => $newTitle ) {
-				$titles[$id - 1] = $titles[$id - 1] ?? $titleObj;
-
-				$redirValues[] = [
-					'from' => $titles[$id - 1]->getPrefixedText(),
-					'to' => $newTitle->getPrefixedText()
-				];
-
-				$titleObj = $newTitle;
-			}
-
-			$result_array['redirects'] = $redirValues;
-			ApiResult::setIndexedTagName( $redirValues, 'r' );
-
-			// Since the page changed, update $pageObj
-			$pageObj = WikiPage::factory( $titleObj );
-		}
 		$result_array['title'] = $titleObj->getPrefixedText();
 
 		$pageObj->loadPageData();
 
-		if ( !$titleObj->exists() ) {
-			$this->dieWithError( 'apierror-missingtitle' );
+		$content = null;
+		try {
+			$content = ContentHandler::makeContent( $params['text'], $titleObj );
+		} catch ( MWContentSerializationException $ex ) {
+			$this->dieWithException( $ex, [
+				'wrap' => ApiMessage::create( 'apierror-contentserializationexception', 'parseerror' )
+			] );
 		}
 
-		// getParserOutput will save to Parser cache if able
-		$pout = $this->getPageParserOutput( $pageObj );
-		$text = $this->getHtml( $pout, $titleObj );
+		$popts = ParserOptions::newFromAnon();
+		$popts->setIsPreview( true );
+		$popts->setIsSectionPreview( $params['sectionpreview'] );
+		// Without this option, the parser thinks it's not safe to cache...
+		$popts->enableLimitReport( $wgEnableParserLimitReporting );
+		$popts->setOption( 'wikidexapp', '1' );
 
+		// getParserOutput will save to Parser cache if able
+		$pout = $this->getContentParserOutput( $content, $titleObj, $popts );
+		$text = $this->getHtml( $pout, $titleObj );
 		ApiResult::setContentValue( $result_array, 'text', $text );
+
+		if ( $params['summary'] !== null ) {
+			$result_array['parsedsummary'] = Linker::formatComment( $params['summary'], $titleObj, false );
+			$result_array[ApiResult::META_BC_SUBELEMENTS][] = 'parsedsummary';
+		}
+
 		$displayTitle = $pout->getProperty( 'displaytitle' );
 		if ( $displayTitle ) {
 			$result_array['displaytitle'] = $displayTitle;
@@ -125,6 +123,11 @@ class ApiWikiDexPage extends ApiBase {
 			'title' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
+			'text' => [
+				ApiBase::PARAM_TYPE => 'text',
+			],
+			'summary' => null,
+			'sectionpreview' => false,
 		];
 
 		return $params;
@@ -132,32 +135,32 @@ class ApiWikiDexPage extends ApiBase {
 
 	protected function getExamplesMessages() {
 		return [
-			'action=wikidexpage&format=json&formatversion=2&' .
-				'title=Gu%C3%ADa%20de%20Detective%20Pikachu%2FP%C3%A1gina%201'
-				=> 'apihelp-wikidexpage-example-page',
+			'action=wikidexeditpreview&formatversion=2&' .
+				'title=Gu%C3%ADa%20de%20Detective%20Pikachu%2FP%C3%A1gina%201&' .
+				'text={{Project:Sandbox}}'
+				=> 'apihelp-wikidexeditpreview-example-page',
 		];
 	}
 
 	public function getHelpUrls() {
-		return 'https://github.com/ciencia/mediawiki-extensions-WikiDexApp/wiki/ApiWikiDexPage';
+		return 'https://github.com/ciencia/mediawiki-extensions-WikiDexApp/wiki/ApiWikiDexEditPreview';
+	}
+
+	public function mustBePosted() {
+		return true;
 	}
 
 	private function getPoolKey(): string {
 		$ip = $this->getRequest()->getIP() ?? '';
-		$poolKey = wfWikiID() . ':ApiWikiDexPage:a:' . $ip;
+		$poolKey = wfWikiID() . ':ApiWikiDexEditPreview:a:' . $ip;
 		return $poolKey;
 	}
 
-	private function getPageParserOutput( WikiPage $page ) {
-		$worker = new PoolCounterWorkViaCallback( 'ApiWikiDexPage', $this->getPoolKey(),
+	private function getContentParserOutput( Content $content, Title $title, ParserOptions $popts ) {
+		$worker = new PoolCounterWorkViaCallback( 'ApiWikiDexEditPreview', $this->getPoolKey(),
 			[
-				'doWork' => static function () use ( $page ) {
-					global $wgEnableParserLimitReporting;
-					$options = ParserOptions::newFromAnon();
-					// Without this option, the parser thinks it's not safe to cache...
-					$options->enableLimitReport( $wgEnableParserLimitReporting );
-					$options->setOption( 'wikidexapp', '1' );
-					return $page->getParserOutput( $options );
+				'doWork' => static function () use ( $content, $title, $popts ) {
+					return $content->getParserOutput( $title, null, $popts );
 				},
 				'error' => function () {
 					$this->dieWithError( 'apierror-concurrency-limit' );

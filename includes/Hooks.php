@@ -3,6 +3,8 @@
 namespace MediaWiki\Extension\WikiDexApp;
 
 use \Title;
+use \Parser;
+use \PPFrame;
 
 /**
  * Class that implements the hooks called from MediaWiki
@@ -42,5 +44,32 @@ class Hooks {
 		$ac->setup();
 
 		return true;
+	}
+
+	/**
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ParserOptionsRegister
+	 *
+	 * @param array &$defaults: Options and their defaults
+	 * @param array &$inCacheKey: Whether each option splits the parser cache
+	 * @param array &$lazyOptions: Initializers for lazy-loaded options
+	 */
+	public static function onParserOptionsRegister( &$defaults, &$inCacheKey, &$lazyOptions ) {
+		$defaults['wikidexapp'] = '';
+		$inCacheKey['wikidexapp'] = true;
+
+		return true;
+	}
+
+	public static function onTabberTranscludeRenderLazyLoadedTab( &$tabBody, &$dataProps, Parser $parser, PPFrame $frame ) {
+		if ( $parser->getOptions()->getOption( 'wikidexapp' ) == '1' ) {
+			// Make lazy load tabs full load
+			$pageName = $dataProps['page-title'];
+			$tabBody = $parser->recursiveTagParseFully(
+				sprintf( '{{:%s}}', $pageName ),
+				$frame
+			);
+			unset( $dataProps['pending-load'] );
+			unset( $dataProps['load-url'] );
+		}
 	}
 }

@@ -8,6 +8,13 @@
 	"apihelp-wikidexpage-summary": "Obtiene toda la imformación de una página para mostrarla en la app.",
 	"apihelp-wikidexpage-param-title": "Título de la página a mostrar.",
 	"apihelp-wikidexpage-example-page": "Obtiene la información de la página 'Guía de Detective Pikachu/Página 1'.",
+	"apihelp-wikidexeditpreview-description": "Vista previa de la edición desde la app.",
+	"apihelp-wikidexeditpreview-summary": "Vista previa de la edición desde la app.",
+	"apihelp-wikidexeditpreview-param-title": "Título de la página a editar.",
+	"apihelp-wikidexeditpreview-param-text": "Contenido de la página a editar.",
+	"apihelp-wikidexeditpreview-param-summary": "Resumen de edición.",
+	"apihelp-wikidexeditpreview-param-sectionpreview": "Indica si se trata de una edición de una sección, o una edición completa de la página.",
+	"apihelp-wikidexeditpreview-example-page": "Vista previa de una edición en la página 'Guía de Detective Pikachu/Página 1'.",
 	"apihelp-wikidexappassetbundle-description": "Obtiene archivos CSS y JS necesarios para la app.",
 	"apihelp-wikidexappassetbundle-summary": "Obtiene archivos CSS y JS necesarios para la app.",
 	"apihelp-wikidexappassetbundle-example-simple": "Obtiene los archivos para la app."
