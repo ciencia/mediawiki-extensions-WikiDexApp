@@ -40,6 +40,8 @@ class ApiWikiDexPage extends ApiBase {
 			$this->dieWithError( 'apierror-pagecannotexist' );
 		}
 
+		$this->applyGlobalVarConfigModifications();
+
 		// Current user not needed
 		$anonUser = MediaWikiServices::getInstance()->getUserFactory()->newAnonymous();
 		$anonAuthority = new UserAuthority( $anonUser, MediaWikiServices::getInstance()->getPermissionManager() );

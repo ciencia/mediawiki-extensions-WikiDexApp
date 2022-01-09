@@ -276,4 +276,11 @@ JAVASCRIPT;
 
 		return $text;
 	}
+
+	protected function applyGlobalVarConfigModifications() {
+		$configToModify = $this->getExtConfig( 'WikiDexAppModifySettings' );
+		foreach ( $configToModify as $varName => $varValue ) {
+			$GLOBALS[$varName] = $varValue;
+		}
+	}
 }

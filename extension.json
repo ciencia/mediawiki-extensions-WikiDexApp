@@ -1,6 +1,6 @@
 {
 	"name": "WikiDexApp",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"author": [
 		"Jesús Martínez (Ciencia Al Poder)"
 	],
@@ -47,6 +47,12 @@
 				"ext.tabberNeue"
 			],
 			"description": "Módulos adicionales que pueden cargarse dependiendo de la página."
+		},
+		"WikiDexAppModifySettings": {
+			"value": {
+				"wgTabberTranscludeUpdateLocationOnTabChange": false
+			},
+			"description": "Configuraciones de MediaWiki o extensiones que cambian en la versión móvil"
 		}
 	},
 	"manifest_version": 2

@@ -28,6 +28,8 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 
 		$result_array = [];
 
+		$this->applyGlobalVarConfigModifications();
+
 		$this->getSiteInfo( $result_array );
 		$this->getPagesContent( $result_array, [
 				'MediaWiki:App/estilos.css',
@@ -186,5 +188,12 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 		$text = $resourceLoader->makeModuleResponse( $context, $modules );
 
 		return $text;
+	}
+
+	private function applyGlobalVarConfigModifications() {
+		$configToModify = $this->getExtConfig( 'WikiDexAppModifySettings' );
+		foreach ( $configToModify as $varName => $varValue ) {
+			$GLOBALS[$varName] = $varValue;
+		}
 	}
 }
