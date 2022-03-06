@@ -151,7 +151,7 @@ JAVASCRIPT;
 			'wgAction' => 'view',
 			'wgUserName' => null,
 			'wgUserGroups' => [],
-			'wgCategories' => array_keys( $parserOutput->getCategories() ?? [] ),
+			'wgCategories' => $this->getCategories( $parserOutput ),
 			'wgPageContentLanguage' => $lang->getCode(),
 			'wgPageContentModel' => $title->getContentModel(),
 		];
@@ -159,6 +159,18 @@ JAVASCRIPT;
 
 		// Merge in variables from addJsConfigVars last
 		return array_merge( $vars, $parserOutput->getJsConfigVars() );
+	}
+
+	/**
+	 * Get categories from parserOutput
+	 */
+	private function getCategories( $parserOutput ) {
+		$categories = array_keys( $parserOutput->getCategories() ?? [] );
+		$fmtCategories = [];
+		foreach ( $categories as $category ) {
+			$fmtCategories[] = strtr( $category, '_', ' ' );
+		}
+		return $fmtCategories;
 	}
 
 	/**
