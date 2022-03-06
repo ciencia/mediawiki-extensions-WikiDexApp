@@ -26,10 +26,14 @@ class Hooks {
 		$urls[] = wfExpandUrl( UrlMapper::getAppPageUrlWikiDexPage1( $title ), PROTO_INTERNAL );
 		// old
 		$urls[] = wfExpandUrl( UrlMapper::getAppPageUrl1( $title ), PROTO_INTERNAL );
+		// old
 		if ( strpos( $title->getPrefixedText(), 'MediaWiki:App/' ) === 0 ) {
-			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle2(), PROTO_INTERNAL );
 			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle1(), PROTO_INTERNAL );
 			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrl1( $title ), PROTO_INTERNAL );
+		}
+		// This can be any gadget, some of them are included in the bundle, or may be loaded
+		if ( strpos( $title->getPrefixedText(), 'MediaWiki:Gadget-' ) === 0 ) {
+			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle2(), PROTO_INTERNAL );
 		}
 		return true;
 	}
