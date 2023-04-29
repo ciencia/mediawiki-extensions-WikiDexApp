@@ -11,11 +11,11 @@ use \MediaWiki\MediaWikiServices;
 use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
 use \MediaWiki\Revision\SlotRecord;
-use \MediaWiki\WikiMap\WikiMap;
 use \ParserOptions;
 use \ParserOutput;
 use \Status;
 use \Title;
+use \WikiMap;
 use \WikiPage;
 
 /**
