@@ -14,6 +14,7 @@ use \MediaWiki\MediaWikiServices;
 use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
 use \MediaWiki\Revision\SlotRecord;
+use \MediaWiki\WikiMap\WikiMap;
 use \MWContentSerializationException;
 use \ParserOptions;
 use \ParserOutput;
@@ -154,7 +155,7 @@ class ApiWikiDexEditPreview extends ApiBase {
 
 	private function getPoolKey(): string {
 		$ip = $this->getRequest()->getIP() ?? '';
-		$poolKey = wfWikiID() . ':ApiWikiDexEditPreview:a:' . $ip;
+		$poolKey = WikiMap::getCurrentWikiId() . ':ApiWikiDexEditPreview:a:' . $ip;
 		return $poolKey;
 	}
 
