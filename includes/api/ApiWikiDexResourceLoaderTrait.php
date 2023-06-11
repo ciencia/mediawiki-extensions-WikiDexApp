@@ -328,7 +328,7 @@ JAVASCRIPT;
 
 		$linkCache = MediaWikiServices::getInstance()->getLinkCache();
 
-		foreach ( $links as $link ) {
+		foreach ( $links as $link => $sortkey ) {
 			$entry = [];
 			// Unsupported because it's not needed
 			//$entry['sortkey'] = '';
