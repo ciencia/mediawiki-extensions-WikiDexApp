@@ -20,7 +20,6 @@ use \ParserOutput;
 use \Status;
 use \Title;
 use \WikiMap;
-use \WikiPage;
 
 /**
  * Displays an edit preview from the App to render how the page will look
@@ -59,7 +58,7 @@ class ApiWikiDexEditPreview extends ApiBase {
 			);
 		}
 
-		$pageObj = WikiPage::factory( $titleObj );
+		$pageObj = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $titleObj );
 		$apiResult = $this->getResult();
 		$result_array = [];
 		$result_array['title'] = $titleObj->getPrefixedText();

@@ -52,7 +52,7 @@ class ApiWikiDexPage extends ApiBase {
 			);
 		}
 
-		$pageObj = WikiPage::factory( $titleObj );
+		$pageObj = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $titleObj );
 		$apiResult = $this->getResult();
 		$result_array = [];
 
@@ -79,7 +79,7 @@ class ApiWikiDexPage extends ApiBase {
 			ApiResult::setIndexedTagName( $redirValues, 'r' );
 
 			// Since the page changed, update $pageObj
-			$pageObj = WikiPage::factory( $titleObj );
+			$pageObj = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $titleObj );
 		}
 		$result_array['title'] = $titleObj->getPrefixedText();
 
