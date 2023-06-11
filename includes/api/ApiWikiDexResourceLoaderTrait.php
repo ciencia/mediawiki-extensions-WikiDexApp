@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\WikiDexApp\Api;
 
+use \ApiResult;
 use \FauxRequest;
 use \Html;
 use \MediaWiki\MediaWikiServices;
