@@ -165,7 +165,7 @@ JAVASCRIPT;
 	 * Get categories from parserOutput
 	 */
 	private function getCategories( $parserOutput ) {
-		$categories = array_keys( $parserOutput->getCategories() ?? [] );
+		$categories = $parserOutput->getCategoryNames() ?? [];
 		$fmtCategories = [];
 		foreach ( $categories as $category ) {
 			$fmtCategories[] = strtr( $category, '_', ' ' );
@@ -294,5 +294,61 @@ JAVASCRIPT;
 		foreach ( $configToModify as $varName => $varValue ) {
 			$GLOBALS[$varName] = $varValue;
 		}
+	}
+
+	/**
+	 * Method copied from ApiParse
+	 */
+	private function formatCategoryLinks( $links ) {
+		$result = [];
+
+		if ( !$links ) {
+			return $result;
+		}
+
+		// Fetch hiddencat property
+		$linkBatchFactory = MediaWikiServices::getInstance()->getLinkBatchFactory();
+		$lb = $linkBatchFactory->newLinkBatch();
+		$lb->setArray( [ NS_CATEGORY => $links ] );
+		$db = $this->getDB();
+		$res = $db->select( [ 'page', 'page_props' ],
+			[ 'page_title', 'pp_propname' ],
+			$lb->constructSet( 'page', $db ),
+			__METHOD__,
+			[],
+			[ 'page_props' => [
+				'LEFT JOIN', [ 'pp_propname' => 'hiddencat', 'pp_page = page_id' ]
+			] ]
+		);
+		$hiddencats = [];
+		foreach ( $res as $row ) {
+			$hiddencats[$row->page_title] = isset( $row->pp_propname );
+		}
+
+		$linkCache = MediaWikiServices::getInstance()->getLinkCache();
+
+		foreach ( $links as $link ) {
+			$entry = [];
+			// Unsupported because it's not needed
+			//$entry['sortkey'] = '';
+			// array keys will cast numeric category names to ints, so cast back to string
+			ApiResult::setContentValue( $entry, 'category', (string)$link );
+			if ( !isset( $hiddencats[$link] ) ) {
+				$entry['missing'] = true;
+
+				// We already know the link doesn't exist in the database, so
+				// tell LinkCache that before calling $title->isKnown().
+				$title = Title::makeTitle( NS_CATEGORY, $link );
+				$linkCache->addBadLinkObj( $title );
+				if ( $title->isKnown() ) {
+					$entry['known'] = true;
+				}
+			} elseif ( $hiddencats[$link] ) {
+				$entry['hidden'] = true;
+			}
+			$result[] = $entry;
+		}
+
+		return $result;
 	}
 }
