@@ -30,7 +30,7 @@ class UrlMapper {
 		global $wgScriptPath;
 		// /api.php?action=parse&format=json&formatversion=2&prop=text|sections|categories&redirects=&page=Gu%C3%ADa%20de%20Detective%20Pikachu%2FP%C3%A1gina%201
 		return sprintf(
-			"${wgScriptPath}/api.php?action=parse&format=json&formatversion=2&prop=text|sections|categories&redirects=&page=%s",
+			"{$wgScriptPath}/api.php?action=parse&format=json&formatversion=2&prop=text|sections|categories&redirects=&page=%s",
 			self::appFragmentEncode( $title->getPrefixedText() ) );
 	}
 
@@ -39,7 +39,7 @@ class UrlMapper {
 		global $wgScriptPath;
 		// /api.php?action=wikidexpage&format=json&formatversion=2&title=Gu%C3%ADa%20de%20Detective%20Pikachu%2FP%C3%A1gina%201
 		return sprintf(
-			"${wgScriptPath}/api.php?action=wikidexpage&format=json&formatversion=2&title=%s",
+			"{$wgScriptPath}/api.php?action=wikidexpage&format=json&formatversion=2&title=%s",
 			self::appFragmentEncode( $title->getPrefixedText() ) );
 	}
 
@@ -48,7 +48,7 @@ class UrlMapper {
 		global $wgScriptPath;
 		// /api.php?action=query&format=json&prop=info&inprop=protection&titles=WikiDex
 		return sprintf(
-			"${wgScriptPath}/api.php?action=query&format=json&prop=info&inprop=protection&titles=%s",
+			"{$wgScriptPath}/api.php?action=query&format=json&prop=info&inprop=protection&titles=%s",
 			self::appFragmentEncode( $title->getPrefixedURL() ) );
 	}
 
@@ -57,7 +57,7 @@ class UrlMapper {
 		global $wgScriptPath;
 		// /api.php?action=query&format=json&formatversion=2&maxlag=&prop=revisions&titles=MediaWiki:App/estilosnocturnos.css&rvprop=content
 		return sprintf(
-			"${wgScriptPath}/api.php?action=query&format=json&formatversion=2&maxlag=&prop=revisions&titles=%s&rvprop=content",
+			"{$wgScriptPath}/api.php?action=query&format=json&formatversion=2&maxlag=&prop=revisions&titles=%s&rvprop=content",
 			self::appFragmentEncode( $title->getPrefixedURL() ) );
 	}
 
@@ -65,13 +65,13 @@ class UrlMapper {
 	static function getAppStylesUrlBundle1() {
 		global $wgScriptPath;
 		// /api.php?action=query&format=json&formatversion=2&prop=revisions&titles=MediaWiki:App/estilos.css|MediaWiki:App/estilosdiurnos.css|MediaWiki:App/estilosnocturnos.css|MediaWiki:App/scripts.js&rvprop=content&rvslots=*
-		return "${wgScriptPath}/api.php?action=query&format=json&formatversion=2&prop=revisions&titles=MediaWiki:App/estilos.css|MediaWiki:App/estilosdiurnos.css|MediaWiki:App/estilosnocturnos.css|MediaWiki:App/scripts.js&rvprop=content&rvslots=*";
+		return "{$wgScriptPath}/api.php?action=query&format=json&formatversion=2&prop=revisions&titles=MediaWiki:App/estilos.css|MediaWiki:App/estilosdiurnos.css|MediaWiki:App/estilosnocturnos.css|MediaWiki:App/scripts.js&rvprop=content&rvslots=*";
 	}
 
 	// URL de la app para obtener los CSS de todos los estilos (actual)
 	static function getAppStylesUrlBundle2() {
 		global $wgScriptPath;
 		// /api.php?action=wikidexappassetbundle&format=json&formatversion=2
-		return "${wgScriptPath}/api.php?action=wikidexappassetbundle&format=json&formatversion=2";
+		return "{$wgScriptPath}/api.php?action=wikidexappassetbundle&format=json&formatversion=2";
 	}
 }
