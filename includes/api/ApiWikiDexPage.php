@@ -8,7 +8,6 @@ use \ApiResult;
 use \IDBAccessObject;
 use \PoolCounterWorkViaCallback;
 use \MediaWiki\MediaWikiServices;
-use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
 use \MediaWiki\Revision\SlotRecord;
 use \ParserOptions;
@@ -45,8 +44,7 @@ class ApiWikiDexPage extends ApiBase {
 
 		// Current user not needed
 		$anonUser = MediaWikiServices::getInstance()->getUserFactory()->newAnonymous();
-		$anonAuthority = new UserAuthority( $anonUser, MediaWikiServices::getInstance()->getPermissionManager() );
-		if ( !$anonAuthority->authorizeRead( 'read', $titleObj ) ) {
+		if ( !$anonUser->definitelyCan( 'read', $titleObj ) ) {
 			$this->dieWithError(
 				[ 'apierror-cannotviewtitle', wfEscapeWikiText( $titleObj->getPrefixedText() ) ]
 			);
@@ -94,11 +92,11 @@ class ApiWikiDexPage extends ApiBase {
 		$text = $this->getHtml( $pout, $titleObj );
 
 		ApiResult::setContentValue( $result_array, 'text', $text );
-		$displayTitle = $pout->getProperty( 'displaytitle' );
+		$displayTitle = $pout->getPageProperty( 'displaytitle' );
 		if ( $displayTitle ) {
 			$result_array['displaytitle'] = $displayTitle;
 		}
-		$pp = $pout->getProperties();
+		$pp = $pout->getPageProperties();
 		if ( isset( $pp['noeditsection'] ) ) {
 			$result_array['noeditsection'] = true;
 		}
@@ -107,7 +105,7 @@ class ApiWikiDexPage extends ApiBase {
 		}
 		$result_array['sections'] = $pout->getSections();
 		ApiResult::setIndexedTagName( $result_array['sections'], 's' );
-		$result_array['categories'] = $this->formatCategoryLinks( $pout->getCategories() );
+		$result_array['categories'] = $this->formatCategoryLinks( $pout->getCategoryMap() );
 		ApiResult::setIndexedTagName( $result_array['categories'], 'cl' );
 
 		// Edit permissions

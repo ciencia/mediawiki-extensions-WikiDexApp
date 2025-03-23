@@ -6,10 +6,9 @@ use \ApiBase;
 use \ApiResult;
 use \FauxRequest;
 use \MediaWiki\MediaWikiServices;
-use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
 use \MediaWiki\Revision\SlotRecord;
-use \ResourceLoaderContext;
+use \MediaWiki\ResourceLoader as RL;
 use \Title;
 use Wikimedia\Minify\JavaScriptMinifier;
 use Wikimedia\Minify\CSSMin;
@@ -76,10 +75,9 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 	private function getPagesContent( &$result_array, $titles ) {
 		$pagesContent = [];
 		$anonUser = MediaWikiServices::getInstance()->getUserFactory()->newAnonymous();
-		$anonAuthority = new UserAuthority( $anonUser, MediaWikiServices::getInstance()->getPermissionManager() );
 		foreach ( $titles as $title ) {
 			$titleObj = Title::newFromText( $title );
-			if ( $anonAuthority->authorizeRead( 'read', $titleObj ) ) {
+			if ( $anonUser->definitelyCan( 'read', $titleObj ) ) {
 				$pagesContent[] = $this->getContentPage( $titleObj );
 			}
 		}
@@ -134,7 +132,7 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 		// HACK: Remove base scripts that are being force-loaded in the next request,
 		// because RL blindly loads them again from load.php
 		$resourceLoader = MediaWikiServices::getInstance()->getResourceLoader();
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest( [] ) );
+		$context = new RL\Context( $resourceLoader, new FauxRequest( [] ) );
 		$find = $context->encodeJson( [ 'jquery', 'mediawiki.base' ] );
 		$js = str_replace( $find, '[]', $js );
 		return $js;
@@ -143,7 +141,7 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 	private function getInitialModuleScripts() {
 		$js = $this->getModuleScripts( $this->getExtConfig( 'WikiDexAppDefaultRLModules' ), [ ] ) . "\n";
 		$resourceLoader = MediaWikiServices::getInstance()->getResourceLoader();
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest( [] ) );
+		$context = new RL\Context( $resourceLoader, new FauxRequest( [] ) );
 		return $js;
 	}
 
@@ -164,7 +162,7 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 		$text = '';
 		$resourceLoader = MediaWikiServices::getInstance()->getResourceLoader();
 		//$options['only'] = 'scripts';
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest( $options ) );
+		$context = new RL\Context( $resourceLoader, new FauxRequest( $options ) );
 		$modules = [];
 		foreach ( $moduleNames as $name ) {
 			$module = $resourceLoader->getModule( $name );

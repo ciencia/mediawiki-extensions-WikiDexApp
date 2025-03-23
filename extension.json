@@ -1,12 +1,15 @@
 {
 	"name": "WikiDexApp",
-	"version": "1.2.3",
+	"version": "1.3",
 	"author": [
 		"Jesús Martínez (Ciencia Al Poder)"
 	],
 	"url": "https://github.com/ciencia/mediawiki-extensions-WikiDexApp",
 	"description": "Modificaciones para optimizar el uso de la App para Android.",
 	"license-name": "MIT",
+	"requires": {
+		"MediaWiki": ">= 1.39.0"
+	},
 	"type": "api",
 	"MessagesDirs": {
 		"WikiDexApp": [

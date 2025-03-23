@@ -6,9 +6,8 @@ use \ApiResult;
 use \FauxRequest;
 use \Html;
 use \MediaWiki\MediaWikiServices;
+use \MediaWiki\ResourceLoader as RL;
 use \ParserOutput;
-use \ResourceLoader;
-use \ResourceLoaderContext;
 use \Title;
 
 trait ApiWikiDexResourceLoaderTrait {
@@ -23,7 +22,7 @@ trait ApiWikiDexResourceLoaderTrait {
 		$chunks = [];
 
 		$resourceLoader = $this->getResourceLoader();
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest() );
+		$context = new RL\Context( $resourceLoader, new FauxRequest() );
 
 		$script = <<<JAVASCRIPT
 document.documentElement.className = "client-js";
@@ -180,7 +179,7 @@ JAVASCRIPT;
 	private function getModuleScripts( $moduleNames ) {
 		$finalModuleNames = [];
 		$resourceLoader = $this->getResourceLoader();
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest() );
+		$context = new RL\Context( $resourceLoader, new FauxRequest() );
 		foreach( $moduleNames as $moduleName ) {
 			if ( !in_array( $moduleName, $this->getAllowedModules() ) ) {
 				continue;
@@ -205,7 +204,7 @@ JAVASCRIPT;
 			return '';
 		}
 
-		$html = ResourceLoader::makeInlineScript(
+		$html = RL\ResourceLoader::makeInlineScript(
 			$this->getModuleOutput( $finalModuleNames )
 		);
 		return $html;
@@ -216,7 +215,7 @@ JAVASCRIPT;
 	 *
 	 * @return array Module dependencies
 	 */
-	private function getModuleDeps( $moduleName, ResourceLoaderContext $context ) {
+	private function getModuleDeps( $moduleName, RL\Context $context ) {
 		$deps = [];
 		$resourceLoader = $this->getResourceLoader();
 		$module = $resourceLoader->getModule( $moduleName );
@@ -230,7 +229,7 @@ JAVASCRIPT;
 	private function getModuleStyles( $moduleNames ) {
 		$finalModuleNames = [];
 		$resourceLoader = $this->getResourceLoader();
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest() );
+		$context = new RL\Context( $resourceLoader, new FauxRequest() );
 		foreach( $moduleNames as $moduleName ) {
 			if ( !in_array( $moduleName, $this->getAllowedModules() ) ) {
 				continue;
@@ -264,7 +263,7 @@ JAVASCRIPT;
 	private function getModuleOutput( $moduleNames, $options = [] ) {
 		$text = '';
 		$resourceLoader = $this->getResourceLoader();
-		$context = new ResourceLoaderContext( $resourceLoader, new FauxRequest( $options ) );
+		$context = new RL\Context( $resourceLoader, new FauxRequest( $options ) );
 		$modules = [];
 		foreach ( $moduleNames as $name ) {
 			$module = $resourceLoader->getModule( $name );

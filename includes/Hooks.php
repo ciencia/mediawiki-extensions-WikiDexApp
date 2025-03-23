@@ -29,6 +29,7 @@ class Hooks {
 		// old
 		if ( strpos( $title->getPrefixedText(), 'MediaWiki:App/' ) === 0 ) {
 			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle1(), PROTO_INTERNAL );
+			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrlBundle2(), PROTO_INTERNAL );
 			$urls[] = wfExpandUrl( UrlMapper::getAppStylesUrl1( $title ), PROTO_INTERNAL );
 		}
 		// This can be any gadget, some of them are included in the bundle, or may be loaded

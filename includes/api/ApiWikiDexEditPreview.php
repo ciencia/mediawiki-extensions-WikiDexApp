@@ -10,8 +10,8 @@ use \Content;
 use \IDBAccessObject;
 use \Linker;
 use \PoolCounterWorkViaCallback;
+use \MediaWiki\Content\Renderer\ContentParseParams;
 use \MediaWiki\MediaWikiServices;
-use \MediaWiki\Permissions\UserAuthority;
 use \MediaWiki\Revision\RevisionRecord;
 use \MediaWiki\Revision\SlotRecord;
 use \MWContentSerializationException;
@@ -51,8 +51,7 @@ class ApiWikiDexEditPreview extends ApiBase {
 
 		// Current user not needed
 		$anonUser = MediaWikiServices::getInstance()->getUserFactory()->newAnonymous();
-		$anonAuthority = new UserAuthority( $anonUser, MediaWikiServices::getInstance()->getPermissionManager() );
-		if ( !$anonAuthority->authorizeRead( 'read', $titleObj ) ) {
+		if ( !$anonUser->definitelyCan( 'read', $titleObj ) ) {
 			$this->dieWithError(
 				[ 'apierror-cannotviewtitle', wfEscapeWikiText( $titleObj->getPrefixedText() ) ]
 			);
@@ -91,11 +90,11 @@ class ApiWikiDexEditPreview extends ApiBase {
 			$result_array[ApiResult::META_BC_SUBELEMENTS][] = 'parsedsummary';
 		}
 
-		$displayTitle = $pout->getProperty( 'displaytitle' );
+		$displayTitle = $pout->getPageProperty( 'displaytitle' );
 		if ( $displayTitle ) {
 			$result_array['displaytitle'] = $displayTitle;
 		}
-		$pp = $pout->getProperties();
+		$pp = $pout->getPageProperties();
 		if ( isset( $pp['noeditsection'] ) ) {
 			$result_array['noeditsection'] = true;
 		}
@@ -104,7 +103,7 @@ class ApiWikiDexEditPreview extends ApiBase {
 		}
 		$result_array['sections'] = $pout->getSections();
 		ApiResult::setIndexedTagName( $result_array['sections'], 's' );
-		$result_array['categories'] = $this->formatCategoryLinks( $pout->getCategories() );
+		$result_array['categories'] = $this->formatCategoryLinks( $pout->getCategoryMap() );
 		ApiResult::setIndexedTagName( $result_array['categories'], 'cl' );
 
 		// Edit permissions
@@ -162,7 +161,8 @@ class ApiWikiDexEditPreview extends ApiBase {
 		$worker = new PoolCounterWorkViaCallback( 'ApiWikiDexEditPreview', $this->getPoolKey(),
 			[
 				'doWork' => static function () use ( $content, $title, $popts ) {
-					return $content->getParserOutput( $title, null, $popts );
+					$cpoParams = new ContentParseParams( $title, $revId, $popts, true );
+					return $content->getContentHandler()->getParserOutput( $content, $cpoParams );
 				},
 				'error' => function () {
 					$this->dieWithError( 'apierror-concurrency-limit' );
