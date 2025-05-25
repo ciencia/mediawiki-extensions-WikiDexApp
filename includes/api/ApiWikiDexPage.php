@@ -56,21 +56,18 @@ class ApiWikiDexPage extends ApiBase {
 
 		if ( $titleObj->isRedirect() ) {
 			$revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
-			$titles = $revisionLookup->getRevisionByTitle( $titleObj )
+			// $titles
+			$redirect = $revisionLookup->getRevisionByTitle( $titleObj )
 				->getContent( SlotRecord::MAIN )
-				->getRedirectChain();
+				->getRedirectTarget();
 			$redirValues = [];
 
-			/** @var Title $newTitle */
-			foreach ( $titles as $id => $newTitle ) {
-				$titles[$id - 1] = $titles[$id - 1] ?? $titleObj;
-
+			if ( $redirect !== null ) {
 				$redirValues[] = [
-					'from' => $titles[$id - 1]->getPrefixedText(),
-					'to' => $newTitle->getPrefixedText()
+					'from' => $titleObj->getPrefixedText(),
+					'to' => $redirect->getPrefixedText()
 				];
-
-				$titleObj = $newTitle;
+				$titleObj = $redirect;
 			}
 
 			$result_array['redirects'] = $redirValues;
