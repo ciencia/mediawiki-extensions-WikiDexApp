@@ -94,17 +94,26 @@ class ApiWikiDexAppAssetBundle extends ApiBase {
 			$vals['contentformat'] = 'text/javascript';
 			$vals['contentmodel'] = 'javascript';
 		} else {
-			$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
-			$revision = $revisionStore->getRevisionByTitle( $titleObj );
-			$slot = $revision->getSlot( SlotRecord::MAIN, RevisionRecord::RAW );
-			$content = $slot->getContent();
-			$model = $content->getModel();
-			$format = $content->getDefaultFormat();
+			if ( $titleObj->exists() ) {
+				$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+				$revision = $revisionStore->getRevisionByTitle( $titleObj );
+				$slot = $revision->getSlot( SlotRecord::MAIN, RevisionRecord::RAW );
+				$content = $slot->getContent();
+				$model = $content->getModel();
+				$format = $content->getDefaultFormat();
+				$text = $this->tryGetMinify( $content, $format );
+			} else {
+				$slotRoleregistry = MediaWikiServices::getInstance()->getSlotRoleRegistry();
+				$mainSlotHandler = $slotRoleregistry->getRoleHandler( 'main' );
+				$model = $mainSlotHandler->getDefaultModel( $titleObj );
+				$format = MediaWikiServices::getInstance()->getContentHandlerFactory()
+					->getContentHandler( $model )->getDefaultFormat();
+				$text = false;
+			}
 			// always include format and model.
 			// Format is needed to deserialize, model is needed to interpret.
 			$vals['contentformat'] = $format;
 			$vals['contentmodel'] = $model;
-			$text = $this->tryGetMinify( $content, $format );
 			if ( $text !== false ) {
 				$chunks[] = $text;
 			}

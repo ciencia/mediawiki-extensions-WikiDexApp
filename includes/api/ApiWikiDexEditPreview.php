@@ -103,11 +103,7 @@ class ApiWikiDexEditPreview extends ApiBase {
 		}
 		$result_array['sections'] = $pout->getSections();
 		ApiResult::setIndexedTagName( $result_array['sections'], 's' );
-		$result_array['categories'] = $this->formatCategoryLinks(
-			method_exists( $pout, 'getCategoryMap' ) ?
-			$pout->getCategoryMap() : // 1.43
-			$pout->getCategories() // 1.39 compat
-		);
+		$result_array['categories'] = $this->formatCategoryLinks( $pout->getCategoryMap() );
 		ApiResult::setIndexedTagName( $result_array['categories'], 'cl' );
 
 		// Edit permissions

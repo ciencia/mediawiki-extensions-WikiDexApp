@@ -113,7 +113,7 @@ JAVASCRIPT;
 			? $nsInfo->getCanonicalName( $ns )
 			: $title->getNsText();
 
-		$lang = $title->getPageViewLanguage();
+		$lang = $title->getPageLanguage();
 
 		// Pre-process information
 		$separatorTransTable = $lang->separatorTransformTable();

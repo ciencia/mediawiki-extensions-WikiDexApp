@@ -1,6 +1,6 @@
 {
 	"name": "WikiDexApp",
-	"version": "1.3",
+	"version": "1.4",
 	"author": [
 		"Jesús Martínez (Ciencia Al Poder)"
 	],
@@ -8,7 +8,7 @@
 	"description": "Modificaciones para optimizar el uso de la App para Android.",
 	"license-name": "MIT",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43.0"
 	},
 	"type": "api",
 	"MessagesDirs": {
