@@ -63,9 +63,13 @@ class ApiWikiDexPage extends ApiBase {
 			$redirValues = [];
 
 			if ( $redirect !== null ) {
+				$target = $redirect->getPrefixedText();
+				if ( $redirect->hasFragment() ) {
+					$target .= '#' . $redirect->getFragment();
+				}
 				$redirValues[] = [
 					'from' => $titleObj->getPrefixedText(),
-					'to' => $redirect->getPrefixedText()
+					'to' => $target
 				];
 				$titleObj = $redirect;
 			}
